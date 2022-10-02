@@ -3,102 +3,22 @@ const app = express();
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const crypto = require('crypto');
+const configs = require('./configs');
+const usersRepo = require('./users/config.repository');
 
 app.use(cors())
 app.use(bodyParser.json());
 
-const port = 3000;
+const port = configs.port;
 
-const ITEMS = {
-  users: [
-	{
-	  id: crypto.randomUUID(),
-	  firstName: 'John',
-	  lastName: 'Doe',
-	  address: {
-		streetAndNumber: 'Sesame, 10',
-		postalCode: '077020',
-		city: 'LA',
-		country: 'USA'
-	  },
-	  sports: [ 'running', 'cycling' ],
-	  gender: 'male',
-	  age: 23,
-	  activity_class: 'amateur'
-	},
-    {
-	  id: crypto.randomUUID(),
-	  firstName: 'Jane',
-	  lastName: 'Doe',
-	  address: {
-		streetAndNumber: '1 Mai, 32',
-		postalCode: '077020',
-		city: 'Berceni',
-		country: 'Romania'
-	  },
-	  sports: [ 'running' ],
-	  gender: 'female',
-	  age: 20,
-	  activity_class: 'professional'
-	},
-    {
-	  id: crypto.randomUUID(),
-	  firstName: 'Lorem',
-	  lastName: 'Ipsum',
-	  address: {
-		streetAndNumber: 'Intrarea Verii, 15',
-		postalCode: '27653',
-		city: 'Iasi',
-		country: 'Romania'
-	  },
-	  sports: [ 'walking' ],
-	  gender: 'female',
-	  age: 59,
-	  activity_class: 'professional'
-	},
-    {
-	  id: crypto.randomUUID(),
-	  firstName: 'Rilastil',
-	  lastName: 'Sulfat',
-	  address: {
-		streetAndNumber: 'Strada mica, 3',
-		postalCode: '52296',
-		city: 'Iasi',
-		country: 'Romania'
-	  },
-	  sports: [ 'walking' ],
-	  gender: 'female',
-	  age: 29,
-	  activity_class: 'professional'
-	},
-    {
-	  id: crypto.randomUUID(),
-	  firstName: 'Norbert',
-	  lastName: 'Layis',
-	  address: {
-		streetAndNumber: 'Tamalis, 43',
-		postalCode: '826470',
-		city: 'Budapest',
-		country: 'Hungary'
-	  },
-	  sports: [ 'skiing' ],
-	  gender: 'male',
-	  age: 31,
-	  activity_class: 'amateur'
-	},
-  ],
-};
-
-const sendResponse = function(res, data) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(res[data ? 'json' : 'send'](data));
-	}, parseInt(Math.random() * 5000));
-  }) 
-}
-
-app.get("/users", (req, res) => {
-	return sendResponse(res.status(200), ITEMS.users);
+app.get("/users", async (req, res) => {
+	try {
+		const results = await usersRepo.getAllUsers();
+		res.status(200).send(results)
+	} catch(e) {
+		console.error(e);
+		res.sendStatus(500);
+	}
 });
 
 app.get("/users/:id", (req, res) => {
